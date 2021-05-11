@@ -1,0 +1,56 @@
+{
+  "name": "numerical",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.11.10",
+    "@testing-library/react": "^11.2.6",
+    "@testing-library/user-event": "^12.8.3",
+    "antd": "^4.15.1",
+    "axios": "^0.21.1",
+    "bulma": "^0.9.2",
+    "chart.js": "^3.1.0",
+    "express": "^4.17.1",
+    "immutability-helper": "^3.1.1",
+    "mathjs": "^9.3.2",
+    "mathjs-simple-integral": "^0.1.1",
+    "plot": "^1.0.21",
+    "plotly.js": "^1.58.4",
+    "plotly.js-dist": "^1.58.4",
+    "react": "^17.0.2",
+    "react-animated-css": "^1.2.1",
+    "react-dom": "^17.0.2",
+    "react-plot": "^0.10.0",
+    "react-plotly.js": "^2.5.1",
+    "react-plotlyjs": "^0.4.4",
+    "react-progress-button": "^5.1.0",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "4.0.3",
+    "recharts": "^2.0.9",
+    "web-vitals": "^1.1.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
