@@ -1,14 +1,9 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 import { Input, Typography, Button, Table } from 'antd';
 import { range, compile, evaluate, simplify, parse, abs, derivative } from 'mathjs'
-import createPlotlyComponent from 'react-plotlyjs'
-import Plotly from 'plotly.js/dist/plotly-cartesian'
-// import api from '../api'
-//import Title from 'antd/lib/skeleton/Title';
-var dataGraph = []
-const PlotlyComponent = createPlotlyComponent(Plotly)
-const { Title } = Typography;
+import axios from 'axios';
+
+var api;
 
 const columns = [
   {
@@ -17,14 +12,9 @@ const columns = [
     key: 'iteration'
   },
   {
-    title: 'X0',
-    dataIndex: 'x1',
-    key: 'x1'
-  },
-  {
     title: 'X',
-    dataIndex: 'x2',
-    key: 'x2'
+    dataIndex: 'x',
+    key: 'x'
   },
   {
     title: 'Error',
@@ -40,8 +30,6 @@ class newtonRaph extends Component {
     this.state = {
       size: 'large',
       fx: "",
-      x1: 0,
-      x2: 0,
       x0: 0,
       showTable: false
     };
@@ -50,32 +38,6 @@ class newtonRaph extends Component {
   }
 
 
-  //   componentDidMount = async () => {
-  //     await api.getFunctionByName("Newton").then(db => {
-  //       this.setState({
-  //         fx: db.data.data.fx,
-  //         x1: db.data.data.x,
-  //       })
-  //       console.log(this.state.fx);
-  //       console.log(this.state.x0);
-  //       console.log(this.state.x1);
-  //     })
-  //   }
-
-  Graph(x2) {
-    dataGraph = [
-      {
-        type: 'scatter',
-        x: x2,
-        marker: {
-          color: '#3c753c'
-        },
-        name: 'X1'
-      },
-    ];
-
-  }
-
 
   f(x) {
     let scope = { x: parseFloat(x) };
@@ -83,80 +45,70 @@ class newtonRaph extends Component {
     return expr.evaluate(scope)
   }
 
-  error(xm, x0) {
-    return Math.abs(xm - x0);
+  error(xnew, xold) {
+    return Math.abs((xnew - xold) / xnew);
   }
 
 
-  createTable(x2, x1, error) {
+  createTable(x, error) {
     dataTable = []
     var i = 0;
     for (i = 1; i < error.length; i++) {
       dataTable.push({
+        key: i,
         iteration: i,
-        x2: x2[i],
-        x1: x1[i],
+        x: x[i],
         error: error[i],
       });
     }
-    console.log(x1)
+   
   }
 
   valueChange = (event) => {
     this.setState({
       [event.target.name]: event.target.value
     })
-    console.log(this.state);
   }
+  async dataapi() {
+    await axios({ method: "get", url: "http://localhost:5000/database/onepoint", }).then((response) => { console.log("response: ", response.data); api = response.data; });
+    await this.setState({
+      fx: api.fx,
+      xi: api.x0
+    })
+    this.one()
+  }
+
 
   one() {
     var fx = this.state.fx;
-    var x1 = this.state.x1;
-    var x2 = 0;
-    var xm = 0;
-    var check = 0;
-    var x0 = 0;
+    var xold = this.state.xold;
+    var xnew = 0;
     var i = 0;
-    var error = 1;
+    var error = parseFloat(0.000000);
     var inputdata = []
-    inputdata['x1'] = []
-    inputdata['x2'] = []
+    inputdata['x'] = []
     inputdata['error'] = []
-    inputdata['iteration'] = []
 
-    check = this.f(x1)
-    while (abs(check) >= 0.000001) {
-      check = (this.f(x1) - parseFloat(x1)) / this.f(x1);
-      x2 = x1
-      x1 = this.f(x1)
-      error = this.error(x1, x2);
-      inputdata['iteration'][i] = i;
-      inputdata['x1'][i] = parseFloat(x1).toFixed(6);
-      inputdata['x2'][i] = parseFloat(x2).toFixed(6);
-      inputdata['error'][i] = error.toFixed(6);
 
+    do {
+      xnew = this.f(xold);
+      error = this.error(xnew, xold)
+      inputdata['x'][i] = xnew.toFixed(6);
+      inputdata['error'][i] = Math.abs(error).toFixed(6);
       i++;
-    }
+      xold = xnew;
+
+    } while (Math.abs(error) > 0.000001);
+
+
     console.log(this.state);
-    this.createTable(inputdata['x2'], inputdata['x1'], inputdata['error']);
-    this.setState({ showTable: true, showGrap: true })
-    this.Graph(inputdata['x2'])
+    this.createTable(inputdata['x'], inputdata['error']);
+    this.setState({ showTable: true })
+
   }
 
   render() {
 
-    let layout = {
-      title: 'one',
-      xaxis: {
-        title: 'X'
-      }
-    };
-    let config = {
-      showLink: false,
-      displayModeBar: true
-    };
-
-    const { size } = this.state;
     return (
 
       <div id="content" style={{ padding: 24, background: '#fff', minHeight: 360, textAlign: 'center' }}>
@@ -167,12 +119,12 @@ class newtonRaph extends Component {
           <div class="row" ONE={this.valueChange}>
             <div class="input1">
               <h3 className="text-fx" >F(x) : &nbsp;&nbsp;&nbsp;&nbsp;
-                  <input type="text" name="fx" placeholder="function" onChange={this.valueChange} />
+                  <input type="text" name="fx" value={this.state.fx} placeholder="function" onChange={this.valueChange} />
               </h3>
             </div>
             <div class="input2">
-              <h3 className="text-xi">Xi-1 : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  <input type="text" name="xi" placeholder="xl" onChange={this.valueChange} />
+              <h3 className="text-xi">X : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  <input type="text" name="xold" value={this.state.xold} placeholder="xl" onChange={this.valueChange} />
               </h3>
             </div>
 
@@ -181,22 +133,27 @@ class newtonRaph extends Component {
         <br /><br />
         <div class="con-btn">
           <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }} onClick={this.one}   >ENTER</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }} onClick={this.Garph}   >Graph</button>
+          <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }} onClick={this.dataapi()} >Ex</button>
         </div>
-        <div>
-          <br></br>
-          <br></br>
-          {this.state.showTable === true ?
-            <div>
-              {/* <h2 style={{ textAlign: 'center' }}>Table of Newton Raphson</h2> */}
-              <h4 style={{ textAlign: 'center' }}> fx = {this.state.fx}
-                <br></br> x = {this.state.x1}
-                <Table columns={columns} dataSource={dataTable} size="middle" /></h4></div> : ''}
-          {this.state.showGrap === true ?
-            <PlotlyComponent data={dataGraph} Layout={layout} config={config} /> : ''
-          }
 
-        </div>
+        <br></br>
+        <br></br>
+
+        <div style={{ margin: "30px" }}>
+
+          <h4 style={{ textAlign: 'center', fontSize: '30px' }}>
+            <div>
+              F(x) = {this.state.fx} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X = {this.state.xold}
+            </div>
+          </h4>
+          <div >
+            {this.state.showTable &&
+              <Table columns={columns} dataSource={dataTable} ></Table>
+            }
+          </div>
+
+        </div >
+
 
       </div>
 

@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Card, Input, Button, Table, Col } from 'antd';
 import { range, compile, evaluate, simplify, parse, abs } from 'mathjs'
-
+import axios from 'axios';
 
 var dataTable = [];
-
+var api;
 const columns = [
     {
         title: 'Iteration',
@@ -65,6 +65,7 @@ class bisection extends Component {
         var i = 0;
         for (i = 1; i < error.length; i++) {
             dataTable.push({
+                key:i,
                 iteration: i,
                 xl: xl[i],
                 xr: xr[i],
@@ -81,6 +82,17 @@ class bisection extends Component {
         })
         console.log(this.state);
     }
+
+    async dataapi() {
+        await axios({method: "get",url: "http://localhost:5000/database/bisection",}).then((response) => {console.log("response: ", response.data);api = response.data;});
+        await this.setState({
+            fx:api.fx,
+            xl:api.xl,
+            xr:api.xr
+        })
+        this.bisection()
+      }
+
 
     bisection() {
         var fx = this.state.fx;
@@ -142,17 +154,17 @@ class bisection extends Component {
                             <div class="row" bisection={this.valueChange}>
                                 <div class="input1">
                                     <h3 className="text-fx" >F(x) : &nbsp;&nbsp;&nbsp;&nbsp;
-                                    <input type="text" name="fx" placeholder="function" onChange={this.valueChange} />
+                                    <input type="text" name="fx" value={this.state.fx} placeholder="function" onChange={this.valueChange} />
                                     </h3>
                                 </div>
                                 <div class="input2">
                                     <h3 className="text-xl">XL : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                    <input type="text" name="xl" placeholder="xl" onChange={this.valueChange} />
+                                    <input type="text" name="xl" value={this.state.xl} placeholder="xl" onChange={this.valueChange} />
                                     </h3>
                                 </div>
                                 <div class="input3">
                                     <h3 className="text-xr">XR : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                    <input type="text" name="xr" placeholder="xr" onChange={this.valueChange} />
+                                    <input type="text" name="xr" value={this.state.xr} placeholder="xr" onChange={this.valueChange} />
                                     </h3>
                                 </div>
                             </div>
@@ -160,7 +172,7 @@ class bisection extends Component {
                         <br /><br />
                         <div class="con-btn">
                             <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }} onClick={this.bisection}   >ENTER</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }}    >Graph</button>
+                            <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }} onClick= {()=>this.dataapi()}  >Ex</button>
                         </div>
                     </div>
                 </div>
@@ -173,7 +185,9 @@ class bisection extends Component {
                         </div>
                     </h4>
                     <div >
+                    {this.state.showTable &&
                             <Table columns={columns } dataSource={dataTable} ></Table>
+                    }
                     </div>
                 </div>
             </div >

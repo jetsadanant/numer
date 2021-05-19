@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Input, Typography, Button, Table } from 'antd';
 import { range, compile, evaluate, simplify, parse, abs, derivative } from 'mathjs'
+import axios from 'axios';
 
+var api;
 var dataTable = [];
 const columns = [
   {
@@ -22,27 +24,27 @@ const columns = [
   }
 ];
 
-class newtonRaph extends Component {
+class Newton extends Component {
   constructor() {
     super();
     this.state = {
       size: 'large',
       fx: "",
-      x0: 0,
+      xi: 0,
       showTable: false
     };
     this.valueChange = this.valueChange.bind(this);
     this.newton = this.newton.bind(this);
   }
 
-  func(x) {
+  function (x)  {
     let scope = { x: parseFloat(x) };
     var expr = compile(this.state.fx);
     return expr.evaluate(scope)
   }
 
-  error(xnew, xold) {
-    return Math.abs((xnew - xold) / xnew);
+  error(xnew, xi) {
+    return Math.abs((xnew - xi) / xnew);
   }
 
 
@@ -64,35 +66,41 @@ class newtonRaph extends Component {
     console.log(this.state);
   }
 
-  Diff = (X) => {
+  Diff (X) {
     var expr = derivative(this.state.fx, 'x');
     let scope = { x: parseFloat(X) };
     return expr.evaluate(scope);
 
   }
 
-  newton() {
+  async dataapi() {
+    await axios({ method: "get", url: "http://localhost:5000/database/newtonraphson", }).then((response) => { console.log("response: ", response.data); api = response.data; });
+    await this.setState({
+      fx: api.fx,
+      xi: api.xi
+    })
+    this.newton(this.state.xi)
+  }
+
+  newton(xi) {
     var fx = this.state.fx;
-    var xold = this.state.xold;
     var xnew = 0;
     var i = 0;
-    var error = 1;
+    var error = parseFloat(0.000000);
     var inputdata = []
     inputdata['x'] = []
     inputdata['error'] = []
     inputdata['iteration'] = []
 
-    while (error >= 0.000001) {
-      xnew = xold = (this.func(xold) / this.Diff(xold));
-      error = this.error(xnew, xold);
-      inputdata['iteration'][i] = i;
-      inputdata['x'][i] = parseFloat(xnew).toFixed(6);
-      inputdata['error'][i] = error.toFixed(6);
-      xold = xnew;
+    do {
+      xnew = xi - (this.function(this.state.fx,xi) / this.Diff(xi));
+      error= this.error(xnew, xi)
+      inputdata['x'][i] = xnew.toFixed(6);
+      inputdata['error'][i] = Math.abs(error).toFixed(6);
       i++;
-    }
+      xi = xnew;
+  } while (Math.abs(error) > 0.000001);
 
-    console.log(this.state);
     this.createTable(inputdata['x'], inputdata['error']);
     this.setState({ showTable: true })
 
@@ -110,12 +118,12 @@ class newtonRaph extends Component {
           <div class="row" newton={this.valueChange}>
             <div class="input1">
               <h3 className="text-fx" >F(x) : &nbsp;&nbsp;&nbsp;&nbsp;
-                  <input type="text" name="fx" placeholder="function" onChange={this.valueChange} />
+                  <input type="text" name="fx" value={this.state.fx} placeholder="function" onChange={this.valueChange} />
               </h3>
             </div>
             <div class="input2">
               <h3 className="text-xi"> X : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  <input type="text" name="xold" placeholder="start value" onChange={this.valueChange} />
+                  <input type="text" name="xi" value={this.state.xi} placeholder="start value" onChange={this.valueChange} />
               </h3>
             </div>
 
@@ -124,16 +132,18 @@ class newtonRaph extends Component {
         <br /><br />
         <div class="con-btn">
           <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }} onClick={this.newton}   >ENTER</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }}   >Graph</button>
+          <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }} onClick={this.dataapi()}  >Ex</button>
         </div>
 
         <div style={{ margin: "30px" }}>
 
-          <h4 style={{ textAlign: 'center', fontSize: '30px' }}> fx = {this.state.fx}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; x = {this.state.xold}
+          <h4 style={{ textAlign: 'center', fontSize: '30px' }}> fx = {this.state.fx}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; x = {this.state.xi}
 
           </h4>
           <div >
-            <Table columns={columns} dataSource={dataTable} bordered={true} ></Table>
+            {this.state.showTable &&
+              <Table columns={columns} dataSource={dataTable} ></Table>
+            }
           </div>
 
         </div >
@@ -144,4 +154,4 @@ class newtonRaph extends Component {
   }
 }
 
-export default newtonRaph;
+export default Newton;

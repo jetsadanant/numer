@@ -3,15 +3,10 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Input, Typography, Button, Table } from 'antd';
 import { range, compile, evaluate, simplify, parse, abs } from 'mathjs'
-import createPlotlyComponent from 'react-plotlyjs'
-import Plotly from 'plotly.js/dist/plotly-cartesian'
+import axios from 'axios';
 
-// import api from '../api'
-//import Title from 'antd/lib/skeleton/Title';
 
-var dataGraph = []
-const PlotlyComponent = createPlotlyComponent(Plotly)
-const { Title } = Typography;
+var api;
 
 const columns = [
   {
@@ -49,8 +44,9 @@ class falseposition extends Component {
       fx: "",
       xl: 0,
       xr: 0,
-      showTable: false
-      
+      showTable: false,
+
+
     };
     this.valueChange = this.valueChange.bind(this);
     this.false = this.false.bind(this);
@@ -71,6 +67,7 @@ class falseposition extends Component {
     var i = 0;
     for (i = 1; i < error.length; i++) {
       dataTable.push({
+        key: i,
         iteration: i,
         xl: xl[i],
         xr: xr[i],
@@ -86,65 +83,77 @@ class falseposition extends Component {
     })
     console.log(this.state);
   }
-  
-  false = (xl, xr) => {
+
+  async dataapi() {
+    await axios({ method: "get", url: "http://localhost:5000/database/falseposition", }).then((response) => { console.log("response: ", response.data); api = response.data; });
+    await this.setState({
+      fx: api.fx,
+      xl: api.xl,
+      xr: api.xr
+    })
+    this.false()
+  }
+
+
+  false = () => {
     var fx = this.state.fx;
     var xl = this.state.xl;
     var xr = this.state.xr;
     var xold = 0;
     var x1 = 0;
     var i = 0;
-    var error = 1;
+    var inF = false;
+    var error = parseFloat(0.000000);
     var inputdata = []
     inputdata['xl'] = []
     inputdata['xr'] = []
     inputdata['x1'] = []
     inputdata['error'] = []
     inputdata['iteration'] = []
-    while (error >= 0.000001) {
-      x1 = ((parseFloat(xl) * this.function(xr)) - (parseFloat(xr) * this.function(xl))) / (this.function(xr) - this.function(xl));
-      if (this.function(x1) == 0) {
-        break;
-      } else if (this.function(x1) * this.function(xr) > 0) {
-        xr = x1;
-      } else {
-        xl = x1;
+    if (this.function(xl) < this.function(xr)) {
+      inF = true;
+    }
+    do {
+      x1 = (xl * this.function(xr) - xr * this.function(xl)) / (this.function(xr) - this.function(xl));
+      if (this.function(x1) * this.function(xr) < 0) {
+        error = this.error(x1, xr);
+        if (inF) {
+          xl = x1;
+        }
+        else {
+          xr = x1;
+        }
+
       }
+      else {
+        error = this.error(x1, xl);
+        if (inF) {
+          xr = x1;
+        }
+        else {
+          xl = x1;
+        }
 
-      error = this.error(xold, x1);
-      i++;
-      xold = x1;
-
+      }
       inputdata['iteration'][i] = i;
       inputdata['xl'][i] = parseFloat(xl).toFixed(6);
       inputdata['xr'][i] = parseFloat(xr).toFixed(6);
       inputdata['x1'][i] = parseFloat(x1).toFixed(6);
       inputdata['error'][i] = error.toFixed(6);
+      i++;
 
+    } while (Math.abs(error) > 0.000001);
 
-    }
     // console.log(this.state);
     this.createTable(inputdata['xl'], inputdata['xr'], inputdata['x1'], inputdata['error']);
-    this.setState({ showTable: true});
-   
+    this.setState({ showTable: true });
+
   }
 
 
 
   render() {
 
-    let layout = {
-      title: 'false',
-      xaxis: {
-        title: 'X'
-      }
-    };
-    let config = {
-      showLink: false,
-      displayModeBar: true
-    };
-
-    const { size } = this.state;
     return (
 
       <div id="content" style={{ padding: 24, background: '#fff', minHeight: 360 }}>
@@ -158,25 +167,25 @@ class falseposition extends Component {
               <div class="row" false={this.valueChange}>
                 <div class="input1">
                   <h3 className="text-fx" >F(x) : &nbsp;&nbsp;&nbsp;&nbsp;
-                      <input type="text" name="fx" placeholder="function" onChange={this.valueChange} />
+                      <input type="text" name="fx" value={this.state.fx} placeholder="function" onChange={this.valueChange} />
                   </h3>
                 </div>
                 <div class="input2">
                   <h3 className="text-xl">XL : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <input type="text" name="xl" placeholder="xl" onChange={this.valueChange} />
+                    <input type="text" name="xl" value={this.state.xl} placeholder="xl" onChange={this.valueChange} />
                   </h3>
                 </div>
                 <div class="input3">
                   <h3 className="text-xr">XR : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                      <input type="text" name="xr" placeholder="xr" onChange={this.valueChange} />
+                      <input type="text" name="xr" value={this.state.xr} placeholder="xr" onChange={this.valueChange} />
                   </h3>
                 </div>
               </div>
             </form>
             <br /><br />
             <div class="con-btn">
-              <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }} onClick={this.false}   >ENTER</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }}   >Graph</button>
+              <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }} onClick={this.false}  >ENTER</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }} onClick={() => this.dataapi()}  >Ex</button>
 
             </div>
           </div>
@@ -191,7 +200,9 @@ class falseposition extends Component {
             </div>
           </h4>
           <div >
-            <Table columns={columns} dataSource={dataTable} ></Table>
+            {this.state.showTable &&
+              <Table columns={columns} dataSource={dataTable} ></Table>
+            }
           </div>
 
         </div >
