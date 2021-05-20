@@ -2,15 +2,8 @@ import React, { Component } from 'react'
 import { Card, Input, Button, Table } from 'antd';
 import 'antd/dist/antd.css';
 import { inv, multiply, sum } from 'mathjs';
-import axios from 'axios';
-var api;
-const InputStyle = {
-    background: "#1890ff",
-    color: "white",
-    fontWeight: "bold",
-    fontSize: "24px"
 
-};
+
 var columns = [
     {
         title: "No.",
@@ -30,7 +23,7 @@ var columns = [
 ];
 var x, y, tableTag, answer
 
-class Linears extends Component {
+class Linear extends Component {
 
     constructor() {
         super();
@@ -40,7 +33,7 @@ class Linears extends Component {
         tableTag = []
         this.state = {
             nPoints: 0,
-            // m: 0,
+            m: 0,
             interpolatePoint: 0,
             showInputForm: true,
             showTableInput: false,
@@ -53,22 +46,24 @@ class Linears extends Component {
     createTableInput(n) {
         for (var i = 1; i <= n; i++) {
             x.push(<Input style={{
-                width: "50%",
-                height: "40%",
+                width: "70%",
+                height: "50%",
+                backgroundColor: "black",
                 marginInlineEnd: "5%",
                 marginBlockEnd: "5%",
-                color: "black",
+                color: "white",
                 fontSize: "18px",
                 fontWeight: "bold",
                 justifyContent: "center"
             }}
                 id={"x" + i} key={"x" + i} placeholder={"x" + i} />);
             y.push(<Input style={{
-                width: "50%",
-                height: "40%",
+                width: "100%",
+                height: "50%",
+                backgroundColor: "black",
                 marginInlineEnd: "5%",
                 marginBlockEnd: "5%",
-                color: "black",
+                color: "white",
                 fontSize: "18px",
                 fontWeight: "bold"
             }}
@@ -82,7 +77,7 @@ class Linears extends Component {
         }
 
         this.setState({
-            showInputForm: true,
+            showInputForm: false,
             showTableInput: true
         })
     }
@@ -142,71 +137,54 @@ class Linears extends Component {
             [event.target.name]: event.target.value
         });
     }
-    async dataapi() {
-        await axios({
-          method: "get",
-          url: "http://localhost:5000/database/linear",
-        }).then((response) => {
-          console.log("response: ", response.data);
-          api = response.data;
-        });
-        await this.setState({
-            nPoints:api.numberpoint
-        })
-        await this.createTableInput(api.numberpoint)
-        for (let i = 1; i <= api.numberpoint; i++) {
-          document.getElementById("x" + i).value = api.arrayX[i - 1];
-          document.getElementById("y" + i).value = api.arrayY[i - 1];
-        }
-        this.initialValue(parseInt(this.state.nPoints));
-        this.linear(parseInt(this.state.nPoints));
-      }
 
     render() {
         return (
             <div style={{ background: "#FFFF", padding: "30px" }}>
-                <h2 style={{ textAlign: 'center',fontSize:'30px' }}>Linear Regression</h2>
+                <h2 style={{ color: "black", fontWeight: "bold" }}>Linear Regression</h2>
                 <div className="row">
-                    <div className="col" onChange={this.handleChange} style = {{textAlign: 'center',fontSize:'21px'}}>
-                        
+                    <div className="col">
+                        <Card
+                            bordered={true}
+                            style={{ background: "#483D8B", borderRadius: "15px", color: "#FFFFFFFF", textAlign: "center", }}
+                            onChange={this.handleChange}
+                        >
                             {this.state.showInputForm &&
                                 <div>
-                                    <h4>Number of points(n) : &nbsp;&nbsp;<Input  name="nPoints" value={this.state.nPoints}size="large"style={{ width: 300 }}></Input></h4><br />
-                                    <Button id="dimention_button" size="large"onClick={
-                                        () => this.createTableInput(parseInt(this.state.nPoints))}
-                                        style={{ background: "#008080", color: "white" }}>
-                                        Submit<br></br>
-                                    </Button>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                        <Button type="submit"   size="large"
-                                        style={{ color:'black',background:'#f7c602'}}
-                                        onClick={() => this.dataapi()}>
-                                            Function
-                                        </Button>
+                                    <h2 style={{ color: "#FFFFFF" }}>Number of points</h2><Input size="large" name="nPoints" style={{ background: "whilte", color: "white", fontWeight: "bold", fontSize: "24px" }}></Input>
+                                    <br /><br /><br />
+                                    <button id="dimention_button" onClick={
+                                        () => this.createTableInput(parseInt(this.state.nPoints), parseInt(this.state.m))}
+                                        style={{ background: "#20B2AA", color: "white", fontSize: "30px" }}>
+                                        Enter<br></br>
+                                    </button>
                                 </div>
                             }
-
                             {this.state.showTableInput &&
-                                <div> <br />
-                                    <Table columns={columns} dataSource={tableTag} pagination={false} bordered={true} bodyStyle={{ fontWeight: "bold", fontSize: "18px", color: "white", overflowY: "scroll", minWidth: 120, maxHeight: 300 }}></Table><br />
-                                    <Button
-                                        id="matrix_button"size="large"
-                                        style={{ width: 150 ,background: "#f7c602", color: "black" }}
-                                        onClick={() => {this.initialValue(parseInt(this.state.nPoints));this.linear(parseInt(this.state.nPoints))}}
+                                <div>
+                                    <Table columns={columns} dataSource={tableTag} pagination={false} bordered={true} bodyStyle={{ fontWeight: "bold", fontSize: "18px", color: "white", overflowY: "scroll", minWidth: 120, maxHeight: 300 }}></Table>
+                                    <br /><br />
+                                    <button
+                                        id="matrix_button"
+                                        style={{ background: "orange", color: "white", fontSize: "30px" }}
+                                        onClick={() => {
+                                            this.initialValue(parseInt(this.state.nPoints));
+                                            this.linear(parseInt(this.state.nPoints))
+                                        }}
                                     >
                                         Submit
-                                </Button>
+                                </button>
                                 </div>
                             }
 
+                        </Card>
                     </div>
-                    <br />
                     <div className="col">
                         {this.state.showOutputCard &&
                             <Card
                                 title={"Output"}
                                 bordered={true}
-                                style={{  background: "white ", color: "black" }}
+                                style={{ border: "2px solid black", background: "rgb(61, 104, 61) none repeat scroll 0% 0%", color: "white" }}
                             >
                                 <p style={{ fontSize: "24px", fontWeight: "bold" }}>x = {JSON.stringify(answer)}</p>
                             </Card>
@@ -225,4 +203,4 @@ class Linears extends Component {
         );
     }
 }
-export default Linears;
+export default Linear;

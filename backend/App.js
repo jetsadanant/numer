@@ -61,11 +61,7 @@ app.get("/database",  (req, res) => {
 
 app.get("/database/:name", (req, res) => {
   const resalt = database.filter(database => database.name == req.params.name)
-  if(resalt.length > 0){
-    res.json(resalt[0])
-  }else{
-    res.json({})
-  }
+  
 });
 
 

@@ -36,15 +36,15 @@ class NewtonD extends Component {
             nPoints: 0,
             X: 0,
             interpolatePoint: 0,
-            showInputForm: true,
-            showTableInput: false,
-            showOutputCard: false
+            showInput: true,
+            showTable: false,
+            showOutput: false
         }
-        this.handleChange = this.handleChange.bind(this);
+        this.valueChange = this.valueChange.bind(this);
         this.newton_difference = this.newton_difference.bind(this);
 
     }
-    createTableInput(n) {
+    createTable(n) {
         for (var i = 1; i <= n; i++) {
             x.push(<Input style={{
                 width: "50%",
@@ -75,11 +75,11 @@ class NewtonD extends Component {
 
 
         this.setState({
-            showInputForm: true,
-            showTableInput: true,
+            showInput: false,
+            showTable: true,
         })
     }
-    createInterpolatePointInput() {
+    createPoint() {
         for (var i = 1; i <= this.state.interpolatePoint; i++) {
             tempTag.push(<Input style={{
                 width: "10%",
@@ -93,7 +93,6 @@ class NewtonD extends Component {
                 id={"p" + i} key={"p" + i} placeholder={"p" + i} />)
         }
     }
-
     initialValue() {
         x = []
         y = []
@@ -136,12 +135,12 @@ class NewtonD extends Component {
         }
 
         this.setState({
-            showOutputCard: true
+            showOutput: true
         })
 
     }
 
-    handleChange(event) {
+    valueChange(event) {
         this.setState({
             [event.target.name]: event.target.value
         });
@@ -149,117 +148,119 @@ class NewtonD extends Component {
 
     async dataapi() {
         await axios({
-          method: "get",
-          url: "http://localhost:5000/database/newtondivide",
+            method: "get",
+            url: "http://localhost:5000/database/newtondivide",
         }).then((response) => {
-          console.log("response: ", response.data);
-          api = response.data;
+            console.log("response: ", response.data);
+            api = response.data;
         });
         await this.setState({
             nPoints: api.nPoints,
             X: api.X,
-            interpolatePoint: api.interpolateinput
+            interpolatePoint: api.interpolateinput,
         });
         x = []
         y = []
         interpolatePoint = []
         tempTag = []
         tableTag = []
-        await this.createInterpolatePointInput();
-        await this.createTableInput(api.nPoints);
+        await this.createPoint();
+        await this.createTable(api.nPoints);
         for (let i = 1; i <= api.nPoints; i++) {
-            document.getElementById("x" + i ).value = api.arrayX[i - 1];
+            document.getElementById("x" + i).value = api.arrayX[i - 1];
             document.getElementById("y" + i).value = api.arrayY[i - 1];
         }
         for (let i = 1; i <= api.interpolateinput; i++) {
-            document.getElementById("p" + i ).value = api.interpolatePoint[i - 1];
+            document.getElementById("p" + i).value = api.interpolatePoint[i - 1];
         }
         this.newton_difference(parseInt(this.state.interpolatePoint), parseFloat(this.state.X));
+       
       }
-    
-    render() {
-        return (
-            <div style={{ background: "#FFFF", padding: "30px" }}>
-                <h1 style = {{textAlign: 'center',fontSize:'30px'}}>Newton's Divided Differences Interpolation</h1>
 
-                <div className="row">
-                    <div className="col">
-                        {/* 1  nPoints  X  interpolatePoint*/}
-                            {this.state.showInputForm &&
-                                
-                                    <form style = {{textAlign: 'center',fontSize:'21px'}} id="inputCard">
-                                        <h4>Number of points(n)  : &nbsp;&nbsp;               
-                                            <Input size="large" name ="nPoints" value={this.state.nPoints}style={{ width: 300 }}
-                                            onChange={this.handleChange}
-                                            />
-                                        </h4>
-                                        <br></br>
-                                        <h4>X : &nbsp;&nbsp;
-                                            <Input size="large" name ="X" value={this.state.X}style={{ width: 200 }}
-                                            onChange={this.handleChange}
-                                            />
-                                        </h4>
-                                        <br></br>
-                                        <h4>interpolatePoint : &nbsp;&nbsp;
-                                            <Input size="large" name = "interpolatePoint"value={this.state.interpolatePoint}style={{ width: 200 }}
-                                            onChange={this.handleChange}
-                                            />
-                                        </h4>
-                                        <br></br>
-                                        
-                                        <Button type="submit"   size="large"
-                                        style={{ color:'#ffffff',background:'#008080'}}
-                                        onClick={() => {this.createTableInput(parseInt(this.state.nPoints));this.createInterpolatePointInput()}}>
-                                            Submit
-                                        </Button>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                        <Button type="submit"   size="large"
-                                        style={{ color:'black',background:'#f7c602'}}
-                                        onClick={() => this.dataapi()}>
-                                            Function
-                                        </Button><br />
-                                        </form>
-                            }
-                            {/* 2  tempTag  tableTag*/}
-                            {this.state.showTableInput &&
-                                <div>
-                                    <br />
-                                    <Table columns={columns} dataSource={tableTag} pagination={false} bordered={true} bodyStyle={{ fontWeight: "bold", fontSize: "18px", color: "black", overflowY: "scroll", minWidth: 80, maxHeight: 300 }}></Table>
-                                    <br /><h2>InterpolatePoint {parseInt(this.state.interpolatePoint) === 2 ? "(Linear)" :
-                                        parseInt(this.state.interpolatePoint) === 3 ? "(Quadratic)" :
-                                            "(Polynomial)"}</h2>
-                                            
-                                            {tempTag}
-                                    <Button
-                                        id="matrix_button"size="large"
-                                        style={{ width: 150 ,color:'black',background: "#f7c602" }}
-                                        onClick={() => this.newton_difference(parseInt(this.state.interpolatePoint), parseFloat(this.state.X))}>
-                                        Submit
-                                </Button>
-                                </div>
-                            }
+render() {
+    return (
+        <div style={{ background: "#F5DEB3", padding: "30px", textAlign: "center" }}>
+            <h1 style={{ textAlign: 'center', fontSize: '30px' }}>Newton's Divided Differences Interpolation</h1>
+            <div className="row" >
+                <div className="col">
 
-                            
-                        
-                    </div>
-                    <div className="col">
-                        {this.state.showOutputCard &&
-                            <Card
-                                title={"Output"}
-                                bordered={true}
-                                style={{  background: "while", color: "black" }}
-                            >
-                                <p style={{ fontSize: "24px", fontWeight: "bold" }}>{fx}</p>
+                    {/* 1  nPoints  X  interpolatePoint*/}
+                    {this.state.showInput &&
+                        <Card>
+                            <h2>
+                                Number of points(n)  : &nbsp;&nbsp;
+                                        <input size="large" name="nPoints" value={this.state.nPoints} style={{ width: 300 }} onChange={this.valueChange} />
+                            </h2>
+                            <br></br>
 
-                            </Card> 
-                        }
-                    </div>
+                            <h2>
+                                interpolatePoint &nbsp;&nbsp;&nbsp;&nbsp;: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                       <input size="large" name="interpolatePoint" value={this.state.interpolatePoint} style={{ width: 300 }} onChange={this.valueChange} />
+                            </h2>
+                            <br></br>
 
+                            <h2>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;X &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <input size="large" name="X" value={this.state.X} style={{ width: 300 }} onChange={this.valueChange} />
+                            </h2>
+                            <br></br>
+
+
+
+                            <button id="dimention_button" onClick={() => { this.createTable(parseInt(this.state.nPoints)); this.createPoint() }}
+                                style={{ width: 100, height: 45, background: "#008080", color: "white" }}>
+                                Enter
+                                </button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <button id="btn_ex" onClick={() => this.dataapi()}
+                                style={{ width: 100, height: 45, background: "#008080", color: "white" }}>
+                                Ex
+                                </button>
+                        </Card>
+                    }
+
+                    {/* 2  tempTag  tableTag*/}
+                    {this.state.showTable &&
+                        <div >
+                            <br />
+                            <Table columns={columns} dataSource={tableTag} pagination={false} bordered={true} bodyStyle={{ fontWeight: "bold", fontSize: "18px", color: "black", overflowY: "scroll", minWidth: 80, maxHeight: 300 }}></Table>
+                            <br /><h2>
+                                {parseInt(this.state.interpolatePoint) === 2 ? "(Linear)" :
+                                    parseInt(this.state.interpolatePoint) === 3 ? "(Quadratic)" :
+                                        "(Polynomial)"}</h2>
+
+                            <div> {tempTag}</div>
+                            <br /><br />
+                            <button
+                                id="matrix_button" size="large"
+                                style={{ width: 150, height: 45, color: 'black', background: "orange" }}
+                                onClick={() => this.newton_d(parseInt(this.state.interpolatePoint), parseFloat(this.state.X))}>
+                                Submit
+                         </button>
+                        </div>
+
+
+                    }
+
+                    <br /><br /><br />
+                </div>
+                <div className="col">
+                    {this.state.showOutput &&
+                        <Card
+                            title={"Output"}
+                            bordered={true}
+                            style={{ background: "while" }}
+                        >
+                            <h3 style={{ fontSize: "24px", fontWeight: "bold", color: "red" }}>{fx}</h3>
+
+                        </Card>
+                    }
                 </div>
 
-
             </div>
-        );
-    }
+
+
+        </div>
+    );
+}
 }
 export default NewtonD;

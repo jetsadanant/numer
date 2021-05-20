@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 import { Input, Typography, Button, Table } from 'antd';
 import { range, compile, evaluate, simplify, parse, abs, derivative } from 'mathjs'
 import axios from 'axios';
 
 var api;
-var dataTable = [];
 const columns = [
   {
     title: 'Iteration',
@@ -23,7 +21,7 @@ const columns = [
     dataIndex: "error"
   }
 ];
-
+var dataTable = [];
 class Newton extends Component {
   constructor() {
     super();
@@ -34,13 +32,14 @@ class Newton extends Component {
       showTable: false
     };
     this.valueChange = this.valueChange.bind(this);
-    this.newton = this.newton.bind(this);
+    this.newtonrap = this.newtonrap.bind(this);
   }
 
-  function (x)  {
-    let scope = { x: parseFloat(x) };
+  function(x) {
     var expr = compile(this.state.fx);
+    let scope = { x: parseFloat(x) };
     return expr.evaluate(scope)
+
   }
 
   error(xnew, xi) {
@@ -66,7 +65,7 @@ class Newton extends Component {
     console.log(this.state);
   }
 
-  Diff (X) {
+  Diff(X) {
     var expr = derivative(this.state.fx, 'x');
     let scope = { x: parseFloat(X) };
     return expr.evaluate(scope);
@@ -79,11 +78,12 @@ class Newton extends Component {
       fx: api.fx,
       xi: api.xi
     })
-    this.newton(this.state.xi)
+    this.newtonrap()
   }
 
-  newton(xi) {
+  newtonrap() {
     var fx = this.state.fx;
+    var xi = this.state.xi;
     var xnew = 0;
     var i = 0;
     var error = parseFloat(0.000000);
@@ -93,13 +93,13 @@ class Newton extends Component {
     inputdata['iteration'] = []
 
     do {
-      xnew = xi - (this.function(this.state.fx,xi) / this.Diff(xi));
-      error= this.error(xnew, xi)
+      xnew = xi-(this.function(xi) / this.Diff(xi));
+      error = this.error(xnew,xi);
       inputdata['x'][i] = xnew.toFixed(6);
       inputdata['error'][i] = Math.abs(error).toFixed(6);
       i++;
       xi = xnew;
-  } while (Math.abs(error) > 0.000001);
+    } while (Math.abs(error) > 0.000001);
 
     this.createTable(inputdata['x'], inputdata['error']);
     this.setState({ showTable: true })
@@ -107,9 +107,7 @@ class Newton extends Component {
   }
 
   render() {
-
     return (
-
       <div id="content" style={{ padding: 24, background: '#fff', minHeight: 360, textAlign: 'center' }}>
         <div class="title-newton">
           <h1 style={{ textAlign: 'center', fontSize: "35px" }}>Newton Raphson Method  </h1>
@@ -131,8 +129,8 @@ class Newton extends Component {
         </form>
         <br /><br />
         <div class="con-btn">
-          <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }} onClick={this.newton}   >ENTER</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }} onClick={this.dataapi()}  >Ex</button>
+          <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }} onClick={this.newtonrap} >ENTER</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }} onClick={() => this.dataapi()}  >Ex</button>
         </div>
 
         <div style={{ margin: "30px" }}>

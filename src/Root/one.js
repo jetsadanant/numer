@@ -24,7 +24,7 @@ const columns = [
 ];
 var dataTable = [];
 
-class newtonRaph extends Component {
+class One extends Component {
   constructor() {
     super();
     this.state = {
@@ -73,7 +73,7 @@ class newtonRaph extends Component {
     await axios({ method: "get", url: "http://localhost:5000/database/onepoint", }).then((response) => { console.log("response: ", response.data); api = response.data; });
     await this.setState({
       fx: api.fx,
-      xi: api.x0
+      x0: api.x0
     })
     this.one()
   }
@@ -81,7 +81,7 @@ class newtonRaph extends Component {
 
   one() {
     var fx = this.state.fx;
-    var xold = this.state.xold;
+    var x0 = this.state.x0;
     var xnew = 0;
     var i = 0;
     var error = parseFloat(0.000000);
@@ -91,17 +91,17 @@ class newtonRaph extends Component {
 
 
     do {
-      xnew = this.f(xold);
-      error = this.error(xnew, xold)
+      xnew = this.f(x0);
+      error = this.error(xnew, x0)
       inputdata['x'][i] = xnew.toFixed(6);
       inputdata['error'][i] = Math.abs(error).toFixed(6);
       i++;
-      xold = xnew;
+      x0 = xnew;
 
     } while (Math.abs(error) > 0.000001);
 
 
-    console.log(this.state);
+    // console.log(this.state);
     this.createTable(inputdata['x'], inputdata['error']);
     this.setState({ showTable: true })
 
@@ -124,7 +124,7 @@ class newtonRaph extends Component {
             </div>
             <div class="input2">
               <h3 className="text-xi">X : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  <input type="text" name="xold" value={this.state.xold} placeholder="xl" onChange={this.valueChange} />
+                  <input type="text" name="x0" value={this.state.x0} placeholder="xl" onChange={this.valueChange} />
               </h3>
             </div>
 
@@ -133,7 +133,7 @@ class newtonRaph extends Component {
         <br /><br />
         <div class="con-btn">
           <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }} onClick={this.one}   >ENTER</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }} onClick={this.dataapi()} >Ex</button>
+          <button class="btn" style={{ background: '#3399CC', color: 'white', width: '80px', height: '50px' }} onClick={()=>this.dataapi()} >Ex</button>
         </div>
 
         <br></br>
@@ -143,7 +143,7 @@ class newtonRaph extends Component {
 
           <h4 style={{ textAlign: 'center', fontSize: '30px' }}>
             <div>
-              F(x) = {this.state.fx} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X = {this.state.xold}
+              F(x) = {this.state.fx} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X = {this.state.x0}
             </div>
           </h4>
           <div >
@@ -161,4 +161,4 @@ class newtonRaph extends Component {
   }
 }
 
-export default newtonRaph;
+export default One;

@@ -94,6 +94,7 @@ class bisection extends Component {
       }
 
 
+      
     bisection() {
         var fx = this.state.fx;
         var xl = this.state.xl;
