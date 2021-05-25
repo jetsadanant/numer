@@ -51,6 +51,7 @@ class Newton extends Component {
     dataTable = [];
     for (var i = 0; i < x.length; i++) {
       dataTable.push({
+        key:i,
         iteration: i + 1,
         x: x[i],
         error: error[i]

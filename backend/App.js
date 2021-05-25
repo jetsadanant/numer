@@ -54,16 +54,14 @@ app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *      '200':
  *        description: A successful response
  */
-
 app.get("/database",  (req, res) => {
   res.json(database);
 });
 
 app.get("/database/:name", (req, res) => {
-  const resalt = database.filter(database => database.name == req.params.name)
+  const resalt = database.filter(function(database) {return database.name == req.params.name})
   
 });
-
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);

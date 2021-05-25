@@ -1,65 +1,54 @@
 import React, { Component } from 'react'
 import { Card, Input, Button } from 'antd';
-import { det } from 'mathjs';
 import 'antd/dist/antd.css';
+import { lusolve, format } from 'mathjs';
 import axios from 'axios';
-
-var api;
-var A = [], B = [], answer = [], matrixA = [], matrixB = []
-class Cramer extends Component {
+var api ;
+var A = [], B = [], matrixA = [], matrixB = [], output = [], decompose;
+class Luu extends Component {
 
     constructor() {
         super();
         this.state = {
-            row: parseInt(0),
-            column: parseInt(0),
+            row: 0,
+            column: 0,
             showinput: true,
             showMatrix: false,
             showOutput: false
         }
         this.valueChange = this.valueChange.bind(this);
-        this.cramer = this.cramer.bind(this);
+        this.Lu = this.Lu.bind(this);
 
     }
 
-    cramer() {
-        this.CollectionMatrix();
-        var counter = 0;
-
-        while (counter != this.state.row) {
-            var transformMatrix = JSON.parse(JSON.stringify(A)); //เอา B มาใส่ใน matrixA
-            //    console.log(transformMatrix)
-            for (var i = 0; i < this.state.row; i++) {
-                for (var j = 0; j < this.state.column; j++) {
-                    if (j === counter) {
-                        transformMatrix[i][j] = B[i]
-
-                        break;
-                    }
-
-                }
-
-            }
-            counter++;
-            answer.push(<h2>X<sub>{counter}</sub>=&nbsp;&nbsp;{Math.round(det(transformMatrix)) / Math.round(det(A))}</h2>)
-            answer.push(<br />)
-
+    Lu() {
+        this.initMatrix();
+        decompose = lusolve(A, B)
+        for (var i = 0; i < decompose.length; i++) {
+            output.push(Math.round(decompose[i]));
+            output.push(<br />)
         }
         this.setState({
             showOutput: true
         });
 
+
+    }
+
+    printFraction(value) {
+        return format(value, { fraction: 'ratio' })
     }
 
     createMatrix(row, column) {
-        
         for (var i = 1; i <= row; i++) {
             for (var j = 1; j <= column; j++) {
                 matrixA.push(<Input style={{
-                    width: "10%",
-                    height: "10%",
-                    marginInlineEnd: "1%",
-                    marginBlockEnd: "1%",
+                    width: "18%",
+                    height: "50%",
+                    backgroundColor: "#06d9a0",
+                    marginInlineEnd: "5%",
+                    marginBlockEnd: "5%",
+                    color: "white",
                     fontSize: "18px",
                     fontWeight: "bold"
                 }}
@@ -67,15 +56,18 @@ class Cramer extends Component {
             }
             matrixA.push(<br />)
             matrixB.push(<Input style={{
-                display: "block",
-                width: "40%",
-                height: "15%",
-                marginInlineEnd: "10%",
-                marginBlockEnd: "10%",
+                width: "18%",
+                height: "50%",
+                backgroundColor: "black",
+                marginInlineEnd: "5%",
+                marginBlockEnd: "5%",
+                color: "white",
                 fontSize: "18px",
                 fontWeight: "bold"
             }}
                 id={"b" + i} key={"b" + i} placeholder={"b" + i} />)
+
+
         }
 
         this.setState({
@@ -83,10 +75,9 @@ class Cramer extends Component {
             showMatrix: true,
         })
 
-    }
 
-    //เอาค่าinputมาใส่
-    CollectionMatrix() {
+    }
+    initMatrix() {
         for (var i = 0; i < this.state.row; i++) {
             A[i] = []
             for (var j = 0; j < this.state.column; j++) {
@@ -96,7 +87,6 @@ class Cramer extends Component {
         }
     }
 
-    //เปลี่ยนค่า
     valueChange(event) {
         this.setState({
             [event.target.name]: event.target.value
@@ -104,7 +94,7 @@ class Cramer extends Component {
     }
 
     async dataapi() {
-        await axios({ method: "get", url: "http://localhost:5000/database/cramer", }).then((response) => { console.log("response: ", response.data); api = response.data; });
+        await axios({ method: "get", url: "http://localhost:5000/database/LU", }).then((response) => { console.log("response: ", response.data); api = response.data; });
         await this.setState({
             row: api.row,
             column: api.column,
@@ -114,18 +104,17 @@ class Cramer extends Component {
         await this.createMatrix(api.row, api.column);
         for (let i = 1; i <= api.row; i++) {
             for (let j = 1; j <= api.column; j++) {
-                document.getElementById("a" + i + "" + j).value = api.matrixA[i - 1][j - 1];
+                document.getElementById("a" + i + "" + j).value =
+                    api.arrayA[i - 1][j - 1];
             }
-            document.getElementById("b" + i).value = api.matrixB[i - 1];
+            document.getElementById("b" + i).value = api.arrayB[i - 1];
         }
-        this.cramer();
+        this.Lu();
     }
-
     render() {
-
         return (
             <div style={{ background: "#F5DEB3", padding: "30px" }}>
-                <h1 style={{ textAlign: 'center', fontSize: '30px' }}>Cramer's Rule</h1>
+                <h1 style={{ textAlign: 'center', fontSize: '30px' }}>LU</h1>
                 <div className="row">
                     <div style={{ textAlign: 'center', fontSize: '21px' }}>
                         {this.state.showinput &&
@@ -159,7 +148,7 @@ class Cramer extends Component {
                                             size="large"
                                             id="btn_matrix"
                                             style={{ color: "white", width: 150, padding: "5px", background: '#CC3300' }}
-                                            onClick={() => this.cramer()}>
+                                            onClick={() => this.Lu()}>
                                             Submit
                                 </button>
                                     </div>
@@ -176,7 +165,7 @@ class Cramer extends Component {
                         {this.state.showOutput &&
                             <Card onChange={this.valueChange}>
                                 <p style={{ textAlign: "center", fontSize: "24px", fontWeight: "bold", color: "red" }}>Output
-                                   <div>{answer}</div> </p>
+                                   <div>{output}</div> </p>
                             </Card>
                         }
                     </div>
@@ -186,8 +175,5 @@ class Cramer extends Component {
         );
     }
 }
-export default Cramer;
-
-
-
-
+            
+export default Luu;

@@ -113,6 +113,7 @@ class NewtonD extends Component {
         }
 
     }
+
     findX(n, X) {
         if (n < 1) {
             return 1
@@ -122,11 +123,13 @@ class NewtonD extends Component {
             return (X - x[interpolatePoint[n]]) * this.findX(n - 1, X)
         }
     }
+
     newton_difference(n, X) {
         this.initialValue()
         fx = y[1]
         if (n === 2) { //if linear interpolate
             fx += ((y[interpolatePoint[2]] - y[interpolatePoint[1]]) / (x[interpolatePoint[2]] - x[interpolatePoint[1]])) * (X - x[interpolatePoint[1]])
+        console.log(fx);
         }
         else {
             for (var i = 2; i <= n; i++) {

@@ -27,9 +27,9 @@ class Gauss extends Component {
 
     }
 
-    gauss(n) {
-        this.initMatrix()
-        if (A[0][0] === 0) { //pivoting
+    gauss(row) {
+        this.CollectionMatrix()
+        if (A[0][0] === 0) { // สลับเเถว
             var tempRow = JSON.parse(JSON.stringify(A[0]));
             var tempColumn = B[0];
             A[0] = A[1];
@@ -37,27 +37,29 @@ class Gauss extends Component {
             B[0] = B[1];
             B[1] = tempColumn;
         }
-        //Forward eliminated
-        for (var k = 0; k < n; k++) {
-            for (var i = k + 1; i < n; i++) {
+        //ทำ0 สามเหลี่ยมล่าง
+        for (var k = 0; k < row; k++) {
+            for (var i = k + 1; i < row; i++) {
                 var factor = A[i][k] / A[k][k];
-                for (var j = k; j < n; j++) {
+                for (var j = k; j < row; j++) {
                     A[i][j] = A[i][j] - factor * A[k][j];
                 }
                 B[i] = B[i] - factor * B[k];
+                
             }
         }
-        //Backward Substitution
-        X = new Array(n);
-        X[n - 1] = Math.round(B[n - 1] / A[n - 1][n - 1]); //find Xn
-        for (i = n - 2; i >= 0; i--) { //find Xn-1 to X1
+        console.log(B);
+        
+        X = new Array(row);
+        X[row - 1] = Math.round(B[row - 1] / A[row - 1][row - 1]); 
+        for (i = row - 2; i >= 0; i--) { 
             var sum = B[i];
-            for (j = i + 1; j < n; j++) {
+            for (j = i + 1; j < row; j++) {
                 sum = sum - A[i][j] * X[j];
             }
             X[i] = Math.round(sum / A[i][i]);
         }
-        for (i = 0; i < n; i++) {
+        for (i = 0; i < row; i++) {
             output.push("x" + (i + 1) + " = " + X[i]);
             output.push(<br />)
         }
@@ -88,10 +90,11 @@ class Gauss extends Component {
             }
             matrixA.push(<br />)
             matrixB.push(<Input style={{
-                width: "10%",
-                height: "10%",
-                marginInlineEnd: "1%",
-                marginBlockEnd: "1%",
+                display:"block",
+                width: "20%",
+                height: "15%",
+                marginInlineEnd: "10%",
+                marginBlockEnd: "10%",
                 fontSize: "18px",
                 fontWeight: "bold"
             }}
@@ -107,7 +110,7 @@ class Gauss extends Component {
 
 
     }
-    initMatrix() {
+    CollectionMatrix() {
         for (var i = 0; i < this.state.row; i++) {
             A[i] = []
             for (var j = 0; j < this.state.column; j++) {

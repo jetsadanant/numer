@@ -40,18 +40,18 @@ class Linear extends Component {
             showOutputCard: false
         }
         this.handleChange = this.handleChange.bind(this);
-
+        // this.linear = this.linear.bind(this);
 
     }
-    createTableInput(n) {
-        for (var i = 1; i <= n; i++) {
+    createTableInput(nPoints) {
+        for (var i = 1; i <= nPoints; i++) {
             x.push(<Input style={{
                 width: "70%",
                 height: "50%",
-                backgroundColor: "black",
+
                 marginInlineEnd: "5%",
                 marginBlockEnd: "5%",
-                color: "white",
+                color: "black",
                 fontSize: "18px",
                 fontWeight: "bold",
                 justifyContent: "center"
@@ -60,10 +60,10 @@ class Linear extends Component {
             y.push(<Input style={{
                 width: "100%",
                 height: "50%",
-                backgroundColor: "black",
+
                 marginInlineEnd: "5%",
                 marginBlockEnd: "5%",
-                color: "white",
+                color: "black",
                 fontSize: "18px",
                 fontWeight: "bold"
             }}
@@ -111,7 +111,7 @@ class Linear extends Component {
         }
         matrixY[0] = sum(y)
         matrixY[1] = this.summationOfTwo(x, y)
-        matrixX = inv(matrixX)
+        matrixX = inv(matrixX) //คำนวณค่าผกผันของตารางเมทริกซ์
         answer = JSON.stringify(multiply(matrixX, matrixY))
 
         this.setState({
@@ -151,7 +151,7 @@ class Linear extends Component {
                         >
                             {this.state.showInputForm &&
                                 <div>
-                                    <h2 style={{ color: "#FFFFFF" }}>Number of points</h2><Input size="large" name="nPoints" style={{ background: "whilte", color: "white", fontWeight: "bold", fontSize: "24px" }}></Input>
+                                    <h2 style={{ color: "#FFFFFF" }}>Number of points</h2><Input size="large" name="nPoints" style={{ background: "whilte", color: "black", fontWeight: "bold", fontSize: "24px" }}></Input>
                                     <br /><br /><br />
                                     <button id="dimention_button" onClick={
                                         () => this.createTableInput(parseInt(this.state.nPoints), parseInt(this.state.m))}
@@ -179,15 +179,12 @@ class Linear extends Component {
 
                         </Card>
                     </div>
+                    <br/><br/><br/><br/>
                     <div className="col">
                         {this.state.showOutputCard &&
-                            <Card
-                                title={"Output"}
-                                bordered={true}
-                                style={{ border: "2px solid black", background: "rgb(61, 104, 61) none repeat scroll 0% 0%", color: "white" }}
-                            >
-                                <p style={{ fontSize: "24px", fontWeight: "bold" }}>x = {JSON.stringify(answer)}</p>
-                            </Card>
+                            
+                                <h1 style={{ fontSize: "24px", fontWeight: "bold" ,textAlign:"center"}}>x = {JSON.stringify(answer)}</h1>
+                           
                         }
                     </div>
 

@@ -4,13 +4,6 @@ import 'antd/dist/antd.css';
 import axios from 'axios';
 
 var api;
-const InputStyle = {
-    background: "#1890ff",
-    color: "white", 
-    fontWeight: "bold", 
-    fontSize: "24px"
-
-};
 var columns = [
     {
       title: "No.",
@@ -47,17 +40,16 @@ class Lagrange extends Component {
             showTable: false,
             showOutput: false
         }
-        this.handleChange = this.handleChange.bind(this);
+        this.valueChange = this.valueChange.bind(this);
         this.lagrange = this.lagrange.bind(this);
     
     }  
     // 1 สร้าง input เก็บ input ใน x[],y[]
-    createTableInput(n) {
-        for (var i=1 ; i<=n ; i++) {
+    createTableInput(nPoints) {
+        for (var i=1 ; i<=nPoints ; i++) {
             x.push(<Input style={{
                 width: "50%",
                 height: "40%", 
-                // backgroundColor:"black", 
                 marginInlineEnd: "5%", 
                 marginBlockEnd: "5%",
                 color: "black",
@@ -67,8 +59,7 @@ class Lagrange extends Component {
             id={"x"+i} key={"x"+i} placeholder={"x"+i}/>);
             y.push(<Input style={{
                 width: "50%",
-                height: "40%", 
-                // backgroundColor:"black", 
+                height: "500%", 
                 marginInlineEnd: "5%", 
                 marginBlockEnd: "5%",
                 color: "black",
@@ -117,31 +108,32 @@ class Lagrange extends Component {
         }
     }
 
-    L(X, index, n) {
-        var numerate = 1/*ตัวเศษ*/, denominate = 1/*ตัวส่วน*/;
-        for (var i=1 ; i<=n ; i++) {
-            if (i !== index) {
+    //ช่วงหาร 
+    L(X, interpolatePoint, nPoints) {
+        var numerate = 1/*ตัวเศษ*/, denominate = 1/*ส่วน*/;
+        for (var i=1 ; i<=nPoints ; i++) {
+            if (i !== interpolatePoint) {
                 numerate *= x[i]-X;
-                denominate *= x[i] - x[index];
+                denominate *= x[i] - x[interpolatePoint];  
             }
         } 
         console.log(numerate/denominate)
         return parseFloat(numerate/denominate);
     }
-    // ใช้  L(X, index, n) , initialValue()
-    lagrange(n, X) {
+    // ใช้  L, initialValue()
+    lagrange(interpolatePoint, X) {
         fx = 0
         this.initialValue()
-        for (var i=1 ; i<=n ; i++) {
-            fx += this.L(X, i, n)*y[i];
+        for (var i=1 ; i<=interpolatePoint ; i++) {
+            fx += this.L(X, i, interpolatePoint)*y[i];
         }
         this.setState({
             showOutput: true
         })
-
+        // console.log(fx);
     } 
 
-    handleChange(event) {
+    valueChange(event) {
         this.setState({
             [event.target.name]: event.target.value
         });
@@ -188,7 +180,7 @@ class Lagrange extends Component {
                         {this.state.showInput &&
                             <Card>
                                 <h2>
-                                    Number of points(n)  : &nbsp;&nbsp;
+                                    Number of points : &nbsp;&nbsp;
                                         <input size="large" name="nPoints" value={this.state.nPoints} style={{ width: 300 }} onChange={this.valueChange} />
                                 </h2>
                                 <br></br>

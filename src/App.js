@@ -13,6 +13,9 @@ import Cramer from './Linear/cramer';
 import Gauss from './Linear/guass';
 import Jordan from './Linear/jordan';
 import Jacobi from './Linear/jacobi';
+// import Seidel from './Linear/seident';
+import Luu from './Linear/lu';
+import Gradient from './Linear/conjugate';
 import NewtonD from './interpolation/newton-d';
 import Lagrange from './interpolation/lagrage';
 import Linears from './regression/linear-r';
@@ -52,10 +55,11 @@ class App extends Component {
                     <Menu.Item key="6"><Link to="/cramer">Cramer's Rule</Link></Menu.Item>
                     <Menu.Item key="7"><Link to="/guass">Guass Elimination</Link></Menu.Item>
                     <Menu.Item key="8"><Link to="/jordan">Guass-Jordan</Link></Menu.Item>
-                    {/* <Menu.Item key="9"><Link to="/lu">LU</Link></Menu.Item>  */}
+                    <Menu.Item key="9"><Link to="/lu">LU</Link></Menu.Item> 
                      {/* <Menu.Item key="10"><Link to="/cholesky">Cholesky</Link></Menu.Item> */}
+                     <Menu.Item key="12"><Link to="/conjugate">Conjugate</Link></Menu.Item> 
                     <Menu.Item key="11"><Link to="/jacobi">Jacobi</Link></Menu.Item>
-                     {/* <Menu.Item key="12"><Link to="/conjugate">Conjugate</Link></Menu.Item>  */}
+                     {/* <Menu.Item key="12"><Link to="/seident">Seidel</Link></Menu.Item>  */}
                   </SubMenu>
                   <SubMenu key="sub3" icon={<NotificationOutlined />} title="Interpolation">
                     <Menu.Item key="13"><Link to="/newton-d">Newton Divided-differences</Link></Menu.Item>
@@ -64,7 +68,7 @@ class App extends Component {
                   </SubMenu>
                   <SubMenu key="sub4" icon={<UserOutlined/>} title="Regression">
                     <Menu.Item key="16"><Link to="/linear-r">Linear Regression</Link></Menu.Item>
-                    <Menu.Item key="17">Polynomials Regression</Menu.Item>
+                    {/* <Menu.Item key="17">Polynomials Regression</Menu.Item> */}
                     {/* <Menu.Item key="18">Multiple Linear Regression</Menu.Item> */}
                   </SubMenu>
                 </Menu>
@@ -76,12 +80,16 @@ class App extends Component {
                 <Route path="/newton" component={Newton} />
                 <Route path="/one" component={One} />
                 <Route path="/secant" component={Secant} />
+
                 {/* linear */}
                <Route exact path="/cramer" component={Cramer} /> 
                  <Route exact path="/guass" component={Gauss} />
                 <Route exact path="/jordan" component={Jordan} />
                 <Route exact path="/jacobi" component={Jacobi} />  
-               
+                <Route exact path="/conjugate" component={Gradient} />  
+                <Route exact path="/lu" component={Luu} />  
+                {/* <Route exact path="/seident" component={Seidel} />   */}
+    
                {/* interpolation */}
                <Route exact path="/newton-d" component={NewtonD} />              
                <Route exact path="/lagrage" component={Lagrange} />

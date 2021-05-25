@@ -20,9 +20,9 @@ class Jordan extends Component {
 
     }
 
-    jordan(n) {
-        this.initMatrix();
-        if (A[0][0] === 0) { //pivoting
+    jordan(row) {
+        this.CollectionMatrix();
+        if (A[0][0] === 0) { //สลับ
             var tempRow = JSON.parse(JSON.stringify(A[0]));
             var tempColumn = B[0];
             A[0] = A[1];
@@ -30,44 +30,48 @@ class Jordan extends Component {
             B[0] = B[1];
             B[1] = tempColumn;
         }
-        //Forward eliminate
-        for (var k = 0; k < n; k++) {
-            for (var i = k + 1; i < n; i++) {
+        //0สามเหลี่ยมล่าง
+        for (var k = 0; k < row; k++) {
+            for (var i = k + 1; i < row; i++) {
                 var factor = A[i][k] / A[k][k];
-                for (var j = k; j < n; j++) {
+               
+                for (var j = k; j < row; j++) {
                     A[i][j] = A[i][j] - factor * A[k][j];
                 }
                 B[i] = B[i] - factor * B[k];
-
+               
             }
         }
-        //Backward Substitution
-        for (k = n - 1; k >= 0; k--) {
+        for (k = row - 1; k >= 0; k--) {
             for (i = k; i >= 0; i--) {
 
-                if (i === k) {//Identity matrix
-                    factor = 1 / A[i][k];
+                if (i === k) {
+                    factor = 1 / A[i][k]; //1ทะเเยง
 
-                    for (j = 0; j < n; j++) {
+                    for (j = 0; j < row; j++) {
                         A[i][j] = A[i][j] * factor;
+                        
                     }
                     B[i] = B[i] * factor;
 
-
                 }
-                else {
+                else { //ทำสามเหลี่ยมบน
                     factor = A[i][k] / A[k][k];
-                    for (j = 0; j < n; j++) {
+                    for (j = 0; j <row; j++) {
                         A[i][j] = A[i][j] - factor * A[k][j];
                     }
                     B[i] = B[i] - factor * B[k];
                 }
             }
         }
-        for (i = 0; i < n; i++) {
-            output.push("x" + (i + 1) + " = " + B[i]);
+        for (i = 0; i < row; i++) {
+            output.push("x" + (i + 1) + " = " + B[i] );
             output.push(<br />)
+            //ได้ x1,x2,x3
+            // console.log(output);
         }
+      
+        // console.log(factor);
         this.setState({
             showOutput: true
         });
@@ -89,17 +93,20 @@ class Jordan extends Component {
             }
             matrixA.push(<br />)
             matrixB.push(<Input style={{
-
-                width: "10%",
-                height: "10%",
-                marginInlineEnd: "1%",
-                marginBlockEnd: "1%",
+                display:"block",
+                width: "50%",
+                height: "15%",
+                marginInlineEnd: "15%",
+                marginBlockEnd: "15%",
                 fontSize: "18px",
-                fontWeight: "bold"
+                fontWeight: "bold",
+                textAlign:"center"
             }}
                 id={"b" + i} key={"b" + i} placeholder={"b" + i} />)
+                
         }
 
+        
         this.setState({
             showinput: true,
             showMatrix: true,
@@ -107,7 +114,8 @@ class Jordan extends Component {
 
 
     }
-    initMatrix() {
+    //ดึงค่ามา เเละเอามาใส่b
+    CollectionMatrix() {
         for (var i = 0; i < this.state.row; i++) {
             A[i] = []
             for (var j = 0; j < this.state.column; j++) {
@@ -123,13 +131,7 @@ class Jordan extends Component {
         });
     }
     async dataapi() {
-        await axios({
-            method: "get",
-            url: "http://localhost:5000/database/gaussjordan",
-        }).then((response) => {
-            console.log("response: ", response.data);
-            api = response.data;
-        });
+        await axios({ method: "get", url: "http://localhost:5000/database/gaussjordan", }).then((response) => { console.log("response: ", response.data); api = response.data; });
         await this.setState({
             row: api.row,
             column: api.column,
@@ -148,7 +150,7 @@ class Jordan extends Component {
     }
 
     render() {
-        let { row, column } = this.state;
+       
         return (
             <div style={{ background: "#F5DEB3", padding: "30px" }}>
                 <h1 style={{ textAlign: 'center', fontSize: '30px' }}>Gauss-Jordan Method</h1>
@@ -158,7 +160,7 @@ class Jordan extends Component {
                             <div>
                                 <h4>Row : <input type="text" size="large" name="row" value={this.state.row} style={{ width: 150 }} onChange={this.valueChange}></input> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                 Column : <input type="text" size="large" name="column" value={this.state.column} style={{ width: 150 }} onChange={this.valueChange}></input></h4><br />
-                                <button id="dimention_button" onClick={() => this.createMatrix(row, column)}
+                                <button id="dimention_button" onClick={() => this.createMatrix(this.state.row, this.state.column)}
                                     style={{ background: "#008080", color: "white" }}>
                                     Enter
                                 </button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -185,7 +187,7 @@ class Jordan extends Component {
                                             size="large"
                                             id="btn_matrix"
                                             style={{ color: "white", width: 150, padding: "5px", background: '#CC3300' }}
-                                            onClick={() => this.jordan()}>
+                                            onClick={() => this.jordan(this.state.row)}>
                                             Submit
                                 </button>
                                     </div>
